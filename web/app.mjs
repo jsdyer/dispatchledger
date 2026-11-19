@@ -1,37 +1,21 @@
-import { cleanLines } from './model.mjs';
-const input = document.querySelector('#input');
-const output = document.querySelector('#output');
-const status = document.querySelector('#status');
-const copy = document.querySelector('#copy');
-function update() {
-  const result = cleanLines(input.value);
-  output.value = result.text;
-  status.textContent = `${result.count} unique ${result.count === 1 ? 'line' : 'lines'}; ${result.removed} ${result.removed === 1 ? 'duplicate' : 'duplicates'} removed.`;
-  copy.disabled = result.count === 0;
-}
-input.addEventListener('input', update);
-document.querySelector('#sample').addEventListener('click', () => {
-  input.value = '  Halifax\nLangley\nHalifax\n\nVancouver  ';
-  update();
+import { el, fmt, put, setOptions, start, table } from './ui.mjs';
+import { difference } from './model.mjs';
+start(data => {
+  const labels = {'Combined':'Combined','HRP':'Halifax Regional Police','RCMP':'RCMP Halifax Regional Detachment'};
+  setOptions('first', Object.values(labels), 'Combined');
+  setOptions('second', Object.keys(data.calls.Combined), 'Public-generated calls');
+  function render() {
+    const key = Object.keys(labels).find(k => labels[k] === el('first').value);
+    const measure = el('second').value, pair = data.calls[key][measure];
+    const delta = difference(pair);
+    put('label1','January–June 2024'); put('value1',fmt(pair[0]));
+    put('label2','January–June 2025'); put('value2',fmt(pair[1]));
+    put('finding', measure + ' ' + (delta.number < 0 ? 'fell' : 'rose') + ' by ' + fmt(Math.abs(delta.number)) +
+        ' (' + Math.abs(delta.percent).toFixed(1) + '%) for ' + labels[key] + '.');
+    table('history',['Measure','Jan–Jun 2024','Jan–Jun 2025'],Object.entries(data.calls[key]).map(([name,values])=>[name,...values.map(fmt)]));
+    const rows = Object.entries(data.districts).filter(([agency])=>key === 'Combined' || agency === key)
+      .flatMap(([agency,districts]) => Object.entries(districts).map(([district,n])=>[district + ' · ' + agency,...n.map(fmt)]));
+    table('districts',['Division','Person','Property','Other Criminal Code','Total'],rows);
+  }
+  el('explore').addEventListener('change',render); render();
 });
-document.querySelector('#clear').addEventListener('click', () => {
-  input.value = '';
-  update();
-  input.focus();
-});
-if (navigator.clipboard && window.isSecureContext) {
-  copy.hidden = false;
-  copy.disabled = true;
-  copy.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(output.value);
-      status.textContent = 'Result copied.';
-    } catch {
-      output.focus();
-      output.select();
-      status.textContent = 'Copy was unavailable. The result is selected so you can copy it manually.';
-    }
-  });
-}
-// Namespace future preference storage as coolcode:<tool-id>:<key>.
-// Do not persist pasted text or uploads by default.

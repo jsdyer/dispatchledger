@@ -1,16 +1,46 @@
 {
-  "id": "coolcode-tool-template",
-  "title": "CoolCode Tool Starter",
-  "description": "A browser-only example that trims lines and removes exact duplicates.",
-  "category": "security",
-  "tags": ["text", "lines", "duplicates"],
-  "icon": "scan-search",
-  "url": "/coolcode-tool-template/",
-  "source": "https://github.com/jsdyer/coolcode-tool-template",
+  "id": "dispatchledger",
+  "title": "Dispatch Ledger",
+  "description": "Compare Halifax police service demand by agency, reporting channel and period.",
+  "category": "disclosures",
+  "tags": [
+    "halifax",
+    "police",
+    "service"
+  ],
+  "icon": "scroll-text",
+  "url": "/dispatchledger/",
+  "source": "https://github.com/jsdyer/dispatchledger",
   "hosting": "project",
   "access": "browser",
   "data_info": {
-    "mode": "local",
-    "detail": "The browser reads the text you paste and compares its lines."
+    "mode": "snapshot",
+    "detail": "Halifax Board of Police Commissioners reports provide service counts by agency and separate district crime totals.",
+    "cadence": "Monthly",
+    "probes": [
+      {
+        "label": "Data retrieved",
+        "url": "https://coolcode.ca/dispatchledger/data/edition.json",
+        "path": [
+          "retrieved"
+        ],
+        "count_at": {
+          "path": [
+            "count"
+          ],
+          "unit": "patrol divisions"
+        }
+      },
+      {
+        "label": "Coverage",
+        "url": "https://coolcode.ca/dispatchledger/data/edition.json",
+        "path": [
+          "start"
+        ],
+        "end_path": [
+          "end"
+        ]
+      }
+    ]
   }
 }
